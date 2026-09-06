@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Thông tin tài khoản</title>
+</head>
+<body>
+  <h1>Thông tin tài khoản</h1>
+  <div id="info">Đang tải...</div>
+  <p>
+    <a href="change-password.html">Đổi mật khẩu</a>
+    | <a href="admin.html" id="adminLink" style="display: none">Trang Admin</a>
+    | <button id="logoutBtn">Đăng xuất</button>
+  </p>
+
+  <script>
+    (async () => {
+      const res = await fetch('/api/users/me');
+      if (!res.ok) {
+        window.location.href = 'login.html';
+        return;
+      }
+      const { user } = await res.json();
+      document.getElementById('info').innerHTML = `
+        <p>ID: ${user.id}</p>
+        <p>Email: ${user.email}</p>
+        <p>Vai trò: ${user.role}</p>
+      `;
+      if (user.role === 'admin') {
+        document.getElementById('adminLink').style.display = 'inline';
+      }
+    })();
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

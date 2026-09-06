@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin - Danh sách user</title>
+</head>
+<body>
+  <h1>Danh sách người dùng (Admin)</h1>
+  <div id="content">Đang tải...</div>
+  <p><a href="account.html">Quay lại trang tài khoản</a></p>
+
+  <script>
+    (async () => {
+      const res = await fetch('/api/admin/users');
+      const contentEl = document.getElementById('content');
+
+      if (res.status === 401) {
+        window.location.href = 'login.html';
+        return;
+      }
+      if (res.status === 403) {
+        contentEl.textContent = 'Bạn không có quyền truy cập trang này.';
+        return;
+      }
+
+      const { users } = await res.json();
+      const rows = users
+        .map((u) => `<tr><td>${u.id}</td><td>${u.email}</td><td>${u.role}</td><td>${u.created_at}</td></tr>`)
+        .join('');
+
+      contentEl.innerHTML = `
+        <table border="1" cellpadding="6">
+          <thead><tr><th>ID</th><th>Email</th><th>Vai trò</th><th>Tạo lúc</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    })();
+  </script>
+</body>
+</html>

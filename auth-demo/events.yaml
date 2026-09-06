@@ -1,0 +1,34 @@
+# Catalog cac logging event dung trong app.
+# Moi key: level (info|warn|error) + description (template, {name} se duoc thay the).
+
+login_success:
+  level: info
+  description: "Login success: {email} (userId={userId}, role={role})"
+
+login_failed:
+  level: warn
+  description: "Login failed: {email}"
+
+logout:
+  level: info
+  description: "Logout: userId={userId}"
+
+password_changed:
+  level: info
+  description: "Password changed: userId={userId}"
+
+password_change_failed:
+  level: warn
+  description: "Password change failed (wrong old password): userId={userId}"
+
+admin_access_denied:
+  level: warn
+  description: "Admin access denied: userId={userId} role={role} path={path}"
+
+admin_list_users:
+  level: info
+  description: "Admin listed all users: userId={userId}"
+
+rate_limited:
+  level: warn
+  description: "Rate limit hit: ip={ip} path={path}"

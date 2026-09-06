@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login</title>
+</head>
+<body>
+  <h1>Đăng nhập</h1>
+  <form id="loginForm">
+    <div>
+      <label>Email: <input type="email" id="email" required /></label>
+    </div>
+    <div>
+      <label>Mật khẩu: <input type="password" id="password" required /></label>
+    </div>
+    <button type="submit">Đăng nhập</button>
+  </form>
+  <p id="message" style="color: red"></p>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = '';
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (res.ok) {
+        window.location.href = 'account.html';
+      } else {
+        const data = await res.json();
+        messageEl.textContent = data.error || 'Đăng nhập thất bại';
+      }
+    });
+  </script>
+</body>
+</html>
