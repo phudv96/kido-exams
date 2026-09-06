@@ -19,7 +19,7 @@ hiện đúng flow, hiểu rõ từng cơ chế và giải thích được.
 
 ```bash
 npm install
-node scripts/seed.js   # tao 2 tai khoan demo (xem ben duoi)
+node scripts/seed.js   # tạo 2 tài khoản demo (xem bên dưới)
 node src/server.js     # http://localhost:3000/login.html
 ```
 
@@ -46,19 +46,19 @@ làm.
 auth-demo/
   .env                    JWT_SECRET, PORT
   events.yaml             catalog message logging (level + description)
-  scripts/seed.js         reset DB + seed 2 tai khoan demo
+  scripts/seed.js         reset DB + seed 2 tài khoản demo
   src/
-    config.js             config khong-nhay-cam (port, jwtExpiresIn, rate limit...)
-    db.js                 mo SQLite, tao bang users
-    logger.js             doc events.yaml, expose log()/log.info/warn/error
-    server.js             khoi tao Express, mount route, serve public/
+    config.js             config không nhạy cảm (port, jwtExpiresIn, rate limit...)
+    db.js                 mở SQLite, tạo bảng users
+    logger.js             đọc events.yaml, expose log()/log.info/warn/error
+    server.js             khởi tạo Express, mount route, serve public/
     middleware/
-      auth.js              verify JWT tu cookie -> req.user
-      requireRole.js        middleware factory kiem tra role
+      auth.js              verify JWT từ cookie, trả về req.user
+      requireRole.js        middleware factory kiểm tra role
     routes/
       auth.routes.js        POST /api/auth/login, /logout
       user.routes.js         GET /api/users/me, PUT /api/users/me/password
-      admin.routes.js        GET /api/admin/users (chi admin)
+      admin.routes.js        GET /api/admin/users (chỉ admin)
   public/                  login.html, account.html, change-password.html, admin.html
   .claude/skills/seed-demo-users/SKILL.md
 ```
@@ -76,14 +76,14 @@ auth-demo/
 ## Flow xác thực (tóm tắt)
 
 ```
-Login       -> so password voi bcrypt hash trong DB -> ky JWT {sub, role}
-               -> set cookie httpOnly (het han 1h, khop voi JWT)
-Request sau -> browser tu gui cookie -> middleware `auth` verify JWT
-               -> req.user = {id, role} -> route dung de tra du lieu
-Phan quyen  -> middleware `requireRole('admin')` chay sau `auth`,
-               sai role -> 403; chua dang nhap -> 401 (o buoc `auth`)
-Doi mat khau-> xac nhan lai oldPassword -> hash password moi
-               -> clearCookie ngay (vo hieu hoa session hien tai)
+Đăng nhập    : so sánh password với bcrypt hash trong DB, ký JWT {sub, role},
+               set cookie httpOnly (hết hạn 1h, khớp với JWT)
+Request sau  : browser tự gửi cookie, middleware "auth" verify JWT,
+               gán req.user = {id, role}, route dùng để trả dữ liệu
+Phân quyền   : middleware "requireRole('admin')" chạy sau "auth",
+               sai role trả 403; chưa đăng nhập trả 401 (ở bước "auth")
+Đổi mật khẩu : xác nhận lại oldPassword, hash password mới,
+               clearCookie ngay (vô hiệu hóa session hiện tại)
 ```
 
 Chi tiết hơn: JWT không mã hoá payload (chỉ ký), nên không nhét dữ liệu nhạy
@@ -93,7 +93,7 @@ khẩu — các request đã đăng nhập khác không đụng tới nó, chỉ
 
 ## Bảo mật đã cân nhắc
 
-- **httpOnly cookie**: JS phía client không đọc được token → giảm rủi ro XSS
+- **httpOnly cookie**: JS phía client không đọc được token, giảm rủi ro XSS
   đánh cắp session.
 - **sameSite: lax**: chặn cookie bị gửi kèm trong request ngầm cross-site
   (CSRF từ form/script ở site khác).
@@ -112,8 +112,8 @@ có HTTPS (bắt buộc phải có ở production để bảo vệ password lúc
 
 ## Test thủ công
 
-Không có test tự động — test bằng tay qua UI (`public/login.html` →
-`account.html` → `change-password.html` → `admin.html`) hoặc bằng `curl`:
+Không có test tự động — test bằng tay qua UI (`public/login.html`, rồi
+`account.html`, `change-password.html`, `admin.html`) hoặc bằng `curl`:
 login đúng/sai, xem account info, đổi mật khẩu đúng/sai `oldPassword`, và
 gọi `/api/admin/users` bằng cả 2 tài khoản để thấy 403 (user) và danh sách
 đầy đủ (admin).
